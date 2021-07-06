@@ -14,15 +14,15 @@ def drop_columns_redundant(df):
 def drop_columns_not_needed_for_machine_learning(df):
     df.drop(columns=['collision_id',
                      # 'contributing_factor_vehicle_1',
-                     'contributing_factor_vehicle_2',
-                     'contributing_factor_vehicle_3',
-                     'contributing_factor_vehicle_4',
-                     'contributing_factor_vehicle_5',
+                     # 'contributing_factor_vehicle_2',
+                     # 'contributing_factor_vehicle_3',
+                     # 'contributing_factor_vehicle_4',
+                     # 'contributing_factor_vehicle_5',
                      # 'vehicle_type_code1',
                      # 'vehicle_type_code2',
                      # 'vehicle_type_code_3',
-                     # 'vehicle_type_code_4',
-                     # 'vehicle_type_code_5',
+                     'vehicle_type_code_4',
+                     'vehicle_type_code_5',
                      ], inplace=True)
 
 
@@ -140,7 +140,7 @@ def fill_in_nan_for_latitude_longitude(crashes):
 
     list_of_streetnames_with_coordinates = df_coordinates.on_street_name.unique()
 
-    print(crashes.on_street_name.unique())
+    # print(crashes.on_street_name.unique())
     for idx, row in crashes.iterrows():
         if not (-75 < row['longitude'] < -70):  # nan
             if not (38 < row['latitude'] < 42):  # nan
@@ -156,12 +156,12 @@ def fill_in_nan_for_latitude_longitude(crashes):
 
 def into_categories(df, column):
     df[column] = df[column].replace(
-        ['delivery v', 'delv', 'deliv', 'work van', 'van t', 'van camper'], "van")
+        ['delivery v', 'delv', 'van/transi', 'deliv', 'work van', 'van t', 'van camper'], "van")
 
     df[column] = df[column].replace(['escooter', 'e-sco', 'e-scoter', 'motor',
                                      'scooter', 'motorbike', 'motorcycle',
-                                     'e-scooter', 'motorscooter', 'scoot', ],
-                                    "motorbike", 'moped scoo')
+                                     'e-scooter', 'motorscooter', 'scoot', 'moped scoo'],
+                                    "motorbike")
 
     df[column] = df[column].replace(
         ['e bike', 'e-bik', 'ebike', 'e bik', 'e-bike',
@@ -193,12 +193,53 @@ def into_categories(df, column):
                                      'trk', 'unk', 'box t', 'pick up tr',
                                      'enclosed body - removable enclosure',
                                      'forklift', 'tractor tr'
-                                    ], "big_trucks")
+                                     ], "big_trucks")
 
     df[column] = df[column].replace(
         ['taxi', 'sedan', 'station wagon/sport utility vehicle',
          'convertible', 'pk', '4 dr sedan', 'passenger vehicle', 'limo', 'sport utility / station wagon',
-         '3-door', '2 dr sedan', 'util', 'utili', 'comme', 'motorized home', 'golf cart'], 'car')
+         '3-door', '2 dr sedan', 'util', 'utili', 'comme', 'motorized home', 'box', ], 'car')
 
     df[column] = df[column].replace(
         ['trailer', 'trail', 'stake or rack', 'flat rack', 'lift boom'], 'vehicle-attachment')
+
+
+def one_hot_encoding_vehicles(df):
+    categories = ['car',
+                  'big_trucks',
+                  'van',
+                  'bike',
+                  'motorbike',
+                  "service vehicles",
+                  "public vehicles",
+                  'vehicle-attachment']
+
+    into_categories(df, 'vehicle_type_code1')
+    into_categories(df, 'vehicle_type_code2')
+    into_categories(df, 'vehicle_type_code_3')
+    # into_categories(df, 'vehicle_type_code_4')
+    # into_categories(df, 'vehicle_type_code_5')
+
+    # conditions: are values in vehicle categories?
+    condition_categories_one = df['vehicle_type_code1'].isin(categories)
+    condition_categories_two = df['vehicle_type_code2'].isin(categories)
+    condition_categories_three = df['vehicle_type_code_3'].isin(categories)
+    # condition_categories_four = df['vehicle_type_code_4'].isin(categories)
+    # condition_categories_five = df['vehicle_type_code_5'].isin(categories)
+
+    # only keep rows with only known vehicle categories
+    df_categories = df[condition_categories_one &
+                       condition_categories_two &
+                       condition_categories_three]
+                       # condition_categories_four &
+                       # condition_categories_five]
+
+    # split into dummies: 0 and 1
+    df = pd.get_dummies(data=df_categories, columns=['vehicle_type_code1',
+                                                     'vehicle_type_code2',
+                                                     'vehicle_type_code_3'])
+                                                     # 'vehicle_type_code_4',
+                                                     # 'vehicle_type_code_5'])
+    return df
+
+
