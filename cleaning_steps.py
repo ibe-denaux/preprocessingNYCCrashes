@@ -53,5 +53,11 @@ crashes_copy = one_hot_encoding_vehicles(crashes_copy)
 
 
 crashes_copy.drop(columns='on_street_name', inplace=True)
+crashes_copy.to_csv('crashes_newyork.csv', index=False)
+
+
+
 print(crashes_copy.columns)
 print(crashes_copy.shape)
+print(crashes_copy.dtypes)
+print(crashes_copy.head())

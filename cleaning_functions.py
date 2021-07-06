@@ -13,16 +13,6 @@ def drop_columns_redundant(df):
 
 def drop_columns_not_needed_for_machine_learning(df):
     df.drop(columns=['collision_id',
-                     # 'contributing_factor_vehicle_1',
-                     # 'contributing_factor_vehicle_2',
-                     # 'contributing_factor_vehicle_3',
-                     # 'contributing_factor_vehicle_4',
-                     # 'contributing_factor_vehicle_5',
-                     # 'vehicle_type_code1',
-                     # 'vehicle_type_code2',
-                     # 'vehicle_type_code_3',
-                     'vehicle_type_code_4',
-                     'vehicle_type_code_5',
                      ], inplace=True)
 
 
@@ -212,34 +202,35 @@ def one_hot_encoding_vehicles(df):
                   'motorbike',
                   "service vehicles",
                   "public vehicles",
-                  'vehicle-attachment']
+                  'vehicle-attachment',
+                  np.nan]
 
     into_categories(df, 'vehicle_type_code1')
     into_categories(df, 'vehicle_type_code2')
     into_categories(df, 'vehicle_type_code_3')
-    # into_categories(df, 'vehicle_type_code_4')
-    # into_categories(df, 'vehicle_type_code_5')
+    into_categories(df, 'vehicle_type_code_4')
+    into_categories(df, 'vehicle_type_code_5')
 
     # conditions: are values in vehicle categories?
     condition_categories_one = df['vehicle_type_code1'].isin(categories)
     condition_categories_two = df['vehicle_type_code2'].isin(categories)
     condition_categories_three = df['vehicle_type_code_3'].isin(categories)
-    # condition_categories_four = df['vehicle_type_code_4'].isin(categories)
-    # condition_categories_five = df['vehicle_type_code_5'].isin(categories)
+    condition_categories_four = df['vehicle_type_code_4'].isin(categories)
+    condition_categories_five = df['vehicle_type_code_5'].isin(categories)
 
     # only keep rows with only known vehicle categories
     df_categories = df[condition_categories_one &
                        condition_categories_two &
-                       condition_categories_three]
-                       # condition_categories_four &
-                       # condition_categories_five]
+                       condition_categories_three &
+                       condition_categories_four &
+                       condition_categories_five]
 
     # split into dummies: 0 and 1
     df = pd.get_dummies(data=df_categories, columns=['vehicle_type_code1',
                                                      'vehicle_type_code2',
-                                                     'vehicle_type_code_3'])
-                                                     # 'vehicle_type_code_4',
-                                                     # 'vehicle_type_code_5'])
+                                                     'vehicle_type_code_3',
+                                                     'vehicle_type_code_4',
+                                                     'vehicle_type_code_5'])
     return df
 
 
