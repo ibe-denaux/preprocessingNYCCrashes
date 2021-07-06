@@ -104,6 +104,8 @@ def drop_rows_from_df(df, df_rows_to_drop):
 
 
 def fill_longitude_where_wrong(df):
+    # 4x strange -201 longitude value (East of Japan)
+    # I found the right value on the internet (it is not in the dataset)
     # print(crashes[crashes['longitude']<-75]['longitude'])
     for idx, row in df.iterrows():
         if row.longitude < -75:
@@ -203,7 +205,7 @@ def one_hot_encoding_vehicles(df):
                   "service vehicles",
                   "public vehicles",
                   'vehicle-attachment',
-                  np.nan]
+                  np.nan]           # nan should be here, otherwise I lose too many columns
 
     into_categories(df, 'vehicle_type_code1')
     into_categories(df, 'vehicle_type_code2')
